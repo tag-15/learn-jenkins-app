@@ -5,25 +5,25 @@ pipeline{
         /* 
             multi line comment
         */
-        // stage('Build'){
-        //     agent{
-        //         docker{
-        //             image 'node:18-alpine'
-        //             reuseNode true
-        //         }
-        //     }
-        //     steps{
-        //         sh '''
-        //         # comment
-        //             ls -la
-        //             node --version
-        //             npm --version
-        //             npm ci
-        //             npm run build
-        //             ls -la                    
-        //         '''
-        //     }
-        // }
+        stage('Build'){
+            agent{
+                docker{
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps{
+                sh '''
+                # comment
+                    ls -la
+                    node --version
+                    npm --version
+                    npm ci
+                    npm run build
+                    ls -la                    
+                '''
+            }
+        }
         stage('Unit Tests'){
             parallel{
                 stage('Test'){
