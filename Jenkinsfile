@@ -23,7 +23,7 @@ pipeline{
                     sh '''
                         aws --version
                         aws s3 ls
-                        echo "Hello S3" > index.htm l
+                        echo "Hello S3" > index.html
                         aws s3 cp index.html s3://learn-jenkins-2531/index.html
                     '''
                 }
