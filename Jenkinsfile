@@ -74,10 +74,36 @@ pipeline{
                 }
             }
         }
-        stage('Deploy Staging'){
+        // stage('Deploy Staging'){
+        //     agent{
+        //         docker{
+        //             image 'node:18-alpine'
+        //             reuseNode true
+        //         }
+        //     }
+        //     steps{
+        //         sh '''
+        //             npm install netlify-cli node-jq
+        //             node_modules/.bin/netlify --version
+        //             echo "Deploying to Prod with SiteID - $NETLIFY_SITE_ID"
+        //             node_modules/.bin/netlify status
+        //             node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
+        //             node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
+        //         '''
+        //         script{
+        //             env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
+        //         }
+        //     }
+            
+        // }
+
+        stage('Deploy Staging and Test E2E'){
+            // environment{
+            //     CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
+            // }
             agent{
                 docker{
-                    image 'node:18-alpine'
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
                     reuseNode true
                 }
             }
@@ -88,27 +114,7 @@ pipeline{
                     echo "Deploying to Prod with SiteID - $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                    node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
-                '''
-                script{
-                    env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
-                }
-            }
-            
-        }
-
-        stage('Staging E2E'){
-            environment{
-                CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
-            }
-            agent{
-                docker{
-                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                    reuseNode true
-                }
-            }
-            steps{
-                sh '''
+                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
                     npx playwright test --reporter=html
                 '''
             }
@@ -146,7 +152,7 @@ pipeline{
         //     }
         // }
 
-        stage('Deploy Prod and E2E'){
+        stage('Deploy Prod and Test E2E'){
             environment{
                 CI_ENVIRONMENT_URL = 'https://whimsical-paletas-c5f18a.netlify.app'
             }
