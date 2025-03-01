@@ -28,8 +28,9 @@ pipeline{
                         aws --version
                         yum install jq -y
                         #aws s3 sync build s3://$AWS_S3_BUCKET 
-                        aws ecs register-task-definition --cli-input-json file://aws/task-definition.json | jq '.taskDefinition.revision'
-                        aws ecs update-service --cluster LearnJenkinsAppCluster --service LearnJenkinsApp-Service --task-definition LearnJenkinsApp-TD:2 
+                        LATEST_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition.json | jq '.taskDefinition.revision')
+                        echo $LATEST_REVISION
+                        aws ecs update-service --cluster LearnJenkinsAppCluster --service LearnJenkinsApp-Service --task-definition LearnJenkinsApp-TD:$LATEST_REVISION 
                     '''
                 }
                 
