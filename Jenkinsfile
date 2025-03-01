@@ -10,13 +10,6 @@ pipeline{
         /* 
             multi line comment
         */
-        stage('Docker'){
-            steps{
-                sh '''
-                    docker build -t my-playwright .
-                '''
-            }
-        }
         stage('Build'){
             agent{
                 docker{
