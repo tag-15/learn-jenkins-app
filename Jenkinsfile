@@ -4,6 +4,7 @@ pipeline{
         NETLIFY_SITE_ID = '3e365465-c289-4b6c-bbe2-8d21adc2eadb'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
+        AWS_DEFAULT_REGION = 'us-east-2'
     }
     stages{
         // Comment
@@ -18,9 +19,9 @@ pipeline{
                     reuseNode true
                 }
             }
-            // environment{
-            //     AWS_S3_BUCKET = 'learn-jenkins-2531'
-            // }
+            environment{
+                AWS_S3_BUCKET = 'learn-jenkins-2531'
+            }
             steps{
                 withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
