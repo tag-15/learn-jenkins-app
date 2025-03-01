@@ -74,7 +74,25 @@ pipeline{
                 }
             }
         }
-        stage('Deploy'){
+        stage('Deploy Staging'){
+            agent{
+                docker{
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps{
+                sh '''
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to Prod with SiteID - $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build
+                '''
+            }
+        }
+
+        stage('Deploy Prod'){
             agent{
                 docker{
                     image 'node:18-alpine'
@@ -91,6 +109,7 @@ pipeline{
                 '''
             }
         }
+
         stage('Prod E2E'){
             environment{
                 CI_ENVIRONMENT_URL = 'https://whimsical-paletas-c5f18a.netlify.app'
