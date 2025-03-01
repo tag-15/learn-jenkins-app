@@ -98,9 +98,9 @@ pipeline{
         // }
 
         stage('Deploy Staging and Test E2E'){
-            // environment{
-            //     CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
-            // }
+            environment{
+                CI_ENVIRONMENT_URL = "PASS"
+            }
             agent{
                 docker{
                     image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
