@@ -8,7 +8,7 @@ pipeline{
         ECS_CLUSTER = "LearnJenkinsAppCluster"
         ECS_SERVICE = "LearnJenkinsApp-Service"
         ECS_TD = "LearnJenkinsApp-TD"
-        APP_NAME = "myjenkinsapp"
+        APP_NAME = "learnjenkinsapp"
         AWS_DOCKER_REGISTRY = "688567305462.dkr.ecr.us-east-2.amazonaws.com"
     }
     stages{
