@@ -1,14 +1,15 @@
 pipeline{
     agent any
     environment{
-        NETLIFY_SITE_ID = '3e365465-c289-4b6c-bbe2-8d21adc2eadb'
-        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        //NETLIFY_SITE_ID = '3e365465-c289-4b6c-bbe2-8d21adc2eadb'
+        //NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
         AWS_DEFAULT_REGION = 'us-east-2'
         ECS_CLUSTER = "LearnJenkinsAppCluster"
         ECS_SERVICE = "LearnJenkinsApp-Service"
         ECS_TD = "LearnJenkinsApp-TD"
         APP_NAME = "myjenkinsapp"
+        AWS_DOCKER_REGISTRY = "688567305462.dkr.ecr.us-east-2.amazonaws.com"
     }
     stages{
         // Comment
@@ -46,7 +47,9 @@ pipeline{
             }
             steps{
                 sh '''
-                    docker build -t $APP_NAME:$REACT_APP_VERSION .
+                    docker build -t $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION .
+                    aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_DOCKER_REGISTRY 
+                    docker push $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION
                 '''
             }
         }
