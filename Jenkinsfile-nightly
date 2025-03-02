@@ -1,7 +1,7 @@
 pipeline{
     agent any
     stages{
-        stage('Docker'){
+        stage('Build Docker Images'){
             steps{
                 sh '''
                     docker build -f ci/Dockerfile-playwright -t my-playwright .
