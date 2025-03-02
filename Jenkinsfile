@@ -8,6 +8,7 @@ pipeline{
         ECS_CLUSTER = "LearnJenkinsAppCluster"
         ECS_SERVICE = "LearnJenkinsApp-Service"
         ECS_TD = "LearnJenkinsApp-TD"
+        APP_NAME = "myjenkinsapp"
     }
     stages{
         // Comment
@@ -45,7 +46,7 @@ pipeline{
             }
             steps{
                 sh '''
-                    docker build -t myjenkinsapp .
+                    docker build -t $APP_NAME:$REACT_APP_VERSION .
                 '''
             }
         }
