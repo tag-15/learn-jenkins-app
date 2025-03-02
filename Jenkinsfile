@@ -1,22 +1,30 @@
 pipeline{
     agent any
     environment{
-        //NETLIFY_SITE_ID = '3e365465-c289-4b6c-bbe2-8d21adc2eadb'
-        //NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
         AWS_DEFAULT_REGION = 'us-east-2'
-        ECS_CLUSTER = "LearnJenkinsAppCluster"
-        ECS_SERVICE = "LearnJenkinsApp-Service"
-        ECS_TD = "LearnJenkinsApp-TD"
-        APP_NAME = "learnjenkinsapp"
-        AWS_DOCKER_REGISTRY = "688567305462.dkr.ecr.us-east-2.amazonaws.com"
     }
     stages{
-        // Comment
-        /* 
-            multi line comment
-        */
-        
+
+        stage('Deploy to AWS'){
+            agent{
+                docker{
+                    image 'my-aws-cli'
+                    args "-u root --entrypoint=''"
+                    reuseNode true
+                }
+            }
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json
+                    '''
+                }
+                
+            }
+        }
+
         stage('Build'){
             agent{
                 docker{
@@ -37,48 +45,7 @@ pipeline{
                 '''
             }
         }
-        stage('Build Docker Image'){
-            agent{
-                docker{
-                    image 'my-aws-cli'
-                    args "-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=''"
-                    reuseNode true
-                }
-            }
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                    sh '''
-                        docker build -t $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION .
-                        aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_DOCKER_REGISTRY 
-                        docker push $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION
-                    '''
-                }
-            }
-        }
-        stage('Deploy AWS'){
-            agent{
-                docker{
-                    image 'my-aws-cli'
-                    args "-u root --entrypoint=''"
-                    reuseNode true
-                }
-            }
-            environment{
-                AWS_S3_BUCKET = 'learn-jenkins-2531'
-            }
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                    sh '''
-                        aws --version
-                        #aws s3 sync build s3://$AWS_S3_BUCKET 
-                        LATEST_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition.json | jq '.taskDefinition.revision')
-                        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $ECS_TD:$LATEST_REVISION
-                        aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE
-                    '''
-                }
-                
-            }
-        }
+        
 
 
 
